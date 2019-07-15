@@ -2,16 +2,16 @@
   <div>
     <van-nav-bar class="dl" title="首页" />
     <van-tabs class="channel-tabs" v-model="activeChannelIndex">
-      <van-tab
-        v-for="channelItem in channels"
-        :key="channelItem.id"
-        :title="channelItem.name"
-      >
+      <div slot="nav-right" class="wap-nav" @click="isChannelShow = true">
+        <van-icon name="shop-collect-o" size="36" />
+      </div>
+      <van-tab v-for="channelItem in channels" :key="channelItem.id" :title="channelItem.name">
         <!--
           下拉刷新组件
           isLoading 控制下拉的 loading 状态
           refresh 下拉之后触发的事件
         -->
+
         <van-pull-refresh
           v-model="channelItem.pullRefreshLoading"
           @refresh="onRefresh"
@@ -32,11 +32,19 @@
             <!--
               列表中的内容
             -->
-            <van-cell
-              v-for="item in channelItem.articles"
-              :key="item.art_id"
-              :title="item.title"
-            />
+            <van-cell v-for="item in channelItem.articles" :key="item.art_id" :title="item.title">
+              <div slot="label">
+                <p>
+                  <span>{{item.aut_name}}</span>
+                  &nbsp;
+                  <span>{{ item.comm_count }}评论</span>
+                  &nbsp;
+                   <span>{{ item.pubdate | relativeTime }}</span>
+                   &nbsp;
+                   <van-icon class="close" name="close" @click="handleShowMoreAction(item)" />
+                </p>
+              </div>
+            </van-cell>
           </van-list>
         </van-pull-refresh>
       </van-tab>
@@ -47,22 +55,33 @@
       <van-tabbar-item icon="friends-o">标签</van-tabbar-item>
       <van-tabbar-item icon="setting-o">标签</van-tabbar-item>
     </van-tabbar>
+    <HomeChannel
+      v-model="isChannelShow"
+      :user-channel.sync="channels"
+      :active-index.sync="activeChannelIndex"
+    ></HomeChannel>
   </div>
 </template>
 
 <script>
 import { getchannels } from "@/api/channel";
 import { getArticles } from "@/api/article";
+import HomeChannel from "@/views/compments/channel";
 export default {
+  components: {
+    HomeChannel
+  },
   name: "home",
   data() {
     return {
+      show: false,
       channels: [],
       activeChannelIndex: 0,
       list: [],
       loading: false,
       finished: false,
-      pullRefreshLoading: false
+      pullRefreshLoading: false,
+      isChannelShow: false
     };
   },
   created() {
@@ -74,6 +93,9 @@ export default {
     }
   },
   methods: {
+    showPopup() {
+      this.show = true;
+    },
     async onLoad() {
       // 异步更新数据
       await this.$sleep(800);
@@ -84,14 +106,22 @@ export default {
     async loadInformation() {
       try {
         let channels = [];
-        // 这行代码有什么意义?从哪里获取到的值存起来的?
-        const localchannel = window.localStorage.getItem("channels");
-        if (localchannel) {
-          channels = localchannel;
-        } else {
+        const { user } = this.$store.state;
+        if (user) {
           const res = await getchannels();
           channels = res.data.data.channels;
+        } else {
+          const localChannels = JSON.parse(
+            window.localStorage.getItem("channels")
+          );
+          if (localChannels) {
+            channels = localChannels;
+          } else {
+            const res = await getchannels();
+            channels = res.data.data.channels;
+          }
         }
+        // 这行代码有什么意义?从哪里获取到的值存起来的?
         channels.forEach(item => {
           item.articles = []; // 频道的文章
           item.timestamp = Date.now(); // 用于下一页频道数据的时间戳
@@ -105,6 +135,7 @@ export default {
         window.console.log(error);
       }
     },
+    // 这个是下拉刷新的
     async onRefresh() {
       const res = await getArticles({
         channelId: this.activeChannel.id,
@@ -122,7 +153,7 @@ export default {
       }
       this.activeChannel.pullRefreshLoading = false;
     },
-    // 公用请求加载数据列表
+    // 底下每一个对应的数据列表
     async loadArticles() {
       // const user = this.$store.state.user;
 
@@ -152,7 +183,17 @@ export default {
 </script>
 
 <style scoped>
-.dl {
-  background-color: aquamarine;
+.channel-tabs .wap-nav {
+  position: sticky;
+  right: 0;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  opacity: 1;
+}
+
+.channel-tabs .close {
+  float: right;
+  font-size: 30px;
 }
 </style>

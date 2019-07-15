@@ -9,7 +9,7 @@ request.interceptors.request.use(
     const { user } = store.state;
     // Do something before request is sent
     if (user) {
-      config.headers.Authorization = `Bearer${user.token}`;
+      config.headers.Authorization = `Bearer ${user.token}`;
     }
     return config;
   },
