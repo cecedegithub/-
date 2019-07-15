@@ -32,9 +32,9 @@
         </div>
         <van-grid :gutter="10" class="channel-content" clickable>
           <van-grid-item
-            v-for="(item,index) in userChannel"
+            v-for="(item, index) in userChannel"
             :key="item.id"
-             @click="handleUserChannelClick(item, index)"
+            @click="handleUserChannelClick(item, index)"
           >
             <span
               class="text"
@@ -118,10 +118,10 @@ export default {
       if (!this.isEdit) {
         this.$emit("update:active-index", index);
         this.$emit("input", false);
-        return
+        return;
       }
       const channels = this.userChannel.slice(0);
-      channels.splice(index,1);
+      channels.splice(index, 1);
       this.$emit("update:user-channel", channels);
       const { user } = this.$store.state;
       if (user) {

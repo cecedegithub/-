@@ -5,7 +5,11 @@
       <div slot="nav-right" class="wap-nav" @click="isChannelShow = true">
         <van-icon name="shop-collect-o" size="36" />
       </div>
-      <van-tab v-for="channelItem in channels" :key="channelItem.id" :title="channelItem.name">
+      <van-tab
+        v-for="channelItem in channels"
+        :key="channelItem.id"
+        :title="channelItem.name"
+      >
         <!--
           下拉刷新组件
           isLoading 控制下拉的 loading 状态
@@ -32,16 +36,31 @@
             <!--
               列表中的内容
             -->
-            <van-cell v-for="item in channelItem.articles" :key="item.art_id" :title="item.title">
+            <van-cell
+              v-for="item in channelItem.articles"
+              :key="item.art_id"
+              :title="item.title"
+            >
               <div slot="label">
+                <template v-if="item.cover.type">
+                  <van-grid :border="false" :column-num="3">
+                    <van-grid-item v-for="(img, index) in item.cover.images" :key="index">
+                      <van-image :src="img" lazy-load/>
+                    </van-grid-item>
+                  </van-grid>
+                </template>
                 <p>
-                  <span>{{item.aut_name}}</span>
+                  <span>{{ item.aut_name }}</span>
                   &nbsp;
                   <span>{{ item.comm_count }}评论</span>
                   &nbsp;
-                   <span>{{ item.pubdate | relativeTime }}</span>
-                   &nbsp;
-                   <van-icon class="close" name="close" @click="handleShowMoreAction(item)" />
+                  <span>{{ item.pubdate}}</span>
+                  &nbsp;
+                  <van-icon
+                    class="close"
+                    name="close"
+                    @click="handleShowMoreAction(item)"
+                  />
                 </p>
               </div>
             </van-cell>
@@ -96,8 +115,9 @@ export default {
     showPopup() {
       this.show = true;
     },
-    async handleShowMoreAction (){
-       
+    async handleShowMoreAction(item) {
+      this.currentArticle = item
+      this.isMoreActionShow = true
     },
     async onLoad() {
       // 异步更新数据

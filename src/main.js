@@ -3,9 +3,10 @@ import App from "./App.vue";
 import router from "./router/router";
 import store from "./store/store";
 
-import Vant from "vant";
-import "vant/lib/index.css";
 
+import "vant/lib/index.css";
+import Vant, { Lazyload } from 'vant'
+Vue.use(Lazyload)
 Vue.use(Vant);
 Vue.config.productionTip = false;
 Vue.prototype.$sleep = time => {
