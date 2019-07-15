@@ -96,6 +96,9 @@ export default {
     showPopup() {
       this.show = true;
     },
+    async handleShowMoreAction (){
+       
+    },
     async onLoad() {
       // 异步更新数据
       await this.$sleep(800);
